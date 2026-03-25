@@ -120,7 +120,7 @@ Use native `<form action={dispatch}>` elements only — no React Hook Form or Fo
 
 ### Motion
 
-The section uses `framer-motion` scroll-reveal consistent with the hero — wrap headline, subtext, contact info block, and form in `motion.div` with `whileInView={{ opacity: 1, y: 0 }}` and `initial={{ opacity: 0, y: 20 }}`, with `viewport={{ once: true }}`. Use the same `fadeUp(delay)` helper from `hero.tsx` or extract it to `src/lib/motion.ts`.
+The section uses `framer-motion` scroll-reveal. Wrap headline, subtext, contact info block, and form in `motion.div` using a `fadeUpScroll(delay)` helper — which uses `whileInView` (not `animate`) so animation triggers on scroll, not on mount. Extract both `fadeUp` (mount-based, for hero) and `fadeUpScroll` (scroll-reveal, for below-the-fold sections) to `src/lib/motion.ts`. Do NOT use `fadeUp` in the contact section — mixing the `animate` key with `whileInView` causes both to fire and breaks scroll-reveal.
 
 ---
 
