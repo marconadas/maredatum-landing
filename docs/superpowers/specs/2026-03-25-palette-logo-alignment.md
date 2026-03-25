@@ -73,7 +73,7 @@ All other components (`contact.tsx`, inputs, buttons, borders, section dividers)
    ```bash
    grep -r '#0A1628\|#142240\|#1D6FA4\|#4B9FFF\|#F5A623' src/
    ```
-   Expected: zero results (only the `globals.css` token definitions will have been updated, so this confirms no stale hardcoded references remain).
+   Expected: zero results — all old hex values will have been replaced, leaving no stale hardcoded references in `src/`.
 
 2. `npx tsc --noEmit` exits clean.
 
