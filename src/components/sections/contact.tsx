@@ -8,7 +8,7 @@ import { fadeUpScroll } from "@/lib/motion"
 
 const initialState = { status: "idle" } satisfies ContactActionState
 
-function FieldError({ errors, field }: { errors?: Record<string, string[]>; field: string }) {
+function FieldError({ errors, field }: { errors?: Record<string, string[] | undefined>; field: string }) {
   const msgs = errors?.[field]
   if (!msgs?.length) return null
   return <p className="text-red-400 text-xs mt-1">{msgs[0]}</p>
@@ -16,6 +16,7 @@ function FieldError({ errors, field }: { errors?: Record<string, string[]>; fiel
 
 export function Contact() {
   const [state, dispatch, isPending] = useActionState(contactAction, initialState)
+  const fieldErrors = state.status === "error" ? state.errors : undefined
 
   return (
     <section id="contacto" className="bg-md-bg border-t border-white/8 py-24 px-8 md:px-14">
@@ -83,7 +84,7 @@ export function Contact() {
             <form action={dispatch} className="flex flex-col gap-5">
 
               {state.status === "serverError" && (
-                <p className="text-red-400 text-sm mb-4">{state.message}</p>
+                <p role="alert" className="text-red-400 text-sm mb-4">{state.message}</p>
               )}
 
               {/* Nome */}
@@ -98,7 +99,7 @@ export function Contact() {
                   autoComplete="name"
                   className="w-full bg-md-surface border border-white/10 rounded-sm text-white placeholder:text-white/30 text-sm px-4 py-3 focus:border-md-gold focus:outline-none transition-colors duration-200"
                 />
-                <FieldError errors={state.status === "error" ? state.errors : undefined} field="nome" />
+                <FieldError errors={fieldErrors} field="nome" />
               </div>
 
               {/* Email */}
@@ -113,7 +114,7 @@ export function Contact() {
                   autoComplete="email"
                   className="w-full bg-md-surface border border-white/10 rounded-sm text-white placeholder:text-white/30 text-sm px-4 py-3 focus:border-md-gold focus:outline-none transition-colors duration-200"
                 />
-                <FieldError errors={state.status === "error" ? state.errors : undefined} field="email" />
+                <FieldError errors={fieldErrors} field="email" />
               </div>
 
               {/* Empresa */}
@@ -128,7 +129,7 @@ export function Contact() {
                   autoComplete="organization"
                   className="w-full bg-md-surface border border-white/10 rounded-sm text-white placeholder:text-white/30 text-sm px-4 py-3 focus:border-md-gold focus:outline-none transition-colors duration-200"
                 />
-                <FieldError errors={state.status === "error" ? state.errors : undefined} field="empresa" />
+                <FieldError errors={fieldErrors} field="empresa" />
               </div>
 
               {/* Assunto */}
@@ -142,7 +143,7 @@ export function Contact() {
                   type="text"
                   className="w-full bg-md-surface border border-white/10 rounded-sm text-white placeholder:text-white/30 text-sm px-4 py-3 focus:border-md-gold focus:outline-none transition-colors duration-200"
                 />
-                <FieldError errors={state.status === "error" ? state.errors : undefined} field="assunto" />
+                <FieldError errors={fieldErrors} field="assunto" />
               </div>
 
               {/* Mensagem */}
@@ -156,7 +157,7 @@ export function Contact() {
                   rows={5}
                   className="w-full bg-md-surface border border-white/10 rounded-sm text-white placeholder:text-white/30 text-sm px-4 py-3 focus:border-md-gold focus:outline-none transition-colors duration-200 resize-none"
                 />
-                <FieldError errors={state.status === "error" ? state.errors : undefined} field="mensagem" />
+                <FieldError errors={fieldErrors} field="mensagem" />
               </div>
 
               <div className="pt-2">

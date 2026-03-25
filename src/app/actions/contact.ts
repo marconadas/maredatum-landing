@@ -8,7 +8,7 @@ import { Resend } from "resend"
 
 export type ContactActionState =
   | { status: "idle" }
-  | { status: "error"; errors: Record<string, string[]> }
+  | { status: "error"; errors: Record<string, string[] | undefined> }
   | { status: "serverError"; message: string }
   | { status: "success" }
 
@@ -39,7 +39,7 @@ export async function contactAction(
   if (!result.success) {
     return {
       status: "error",
-      errors: result.error.flatten().fieldErrors as Record<string, string[]>,
+      errors: result.error.flatten().fieldErrors as Record<string, string[] | undefined>,
     }
   }
 
