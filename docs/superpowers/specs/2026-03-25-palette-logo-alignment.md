@@ -40,18 +40,21 @@ The logo contains three distinct colour families:
 
 ### `src/components/sections/hero.tsx`
 
-Two hardcoded colour references that bypass the token system must be updated to match the new `md-bg`:
+One hardcoded colour reference that bypasses the token system must be updated to match the new `md-bg`:
 
 | Location | Before | After |
 |---|---|---|
-| Nav scroll background | `bg-[#0A1628]/90` | `bg-[#0D1F2E]/90` |
-| Logo blend wrapper | `bg-[#0F1828]` | `bg-[#0D1F2E]` |
+| Nav scroll background (`hero.tsx:37`) | `bg-[#0A1628]/90` | `bg-[#0D1F2E]/90` |
+
+**Note on radial gradient overlay (`hero.tsx:133`):** The hero section contains an inline `radial-gradient` with `rgba(26,58,106,0.45)` — a hardcoded decorative depth overlay unrelated to the brand palette. This is intentionally out of scope: it is a one-off visual effect, not a brand colour, and changing it would alter the hero's depth appearance without palette benefit.
 
 ---
 
 ## Propagation
 
 All other components (`contact.tsx`, inputs, buttons, borders, section dividers) already consume `md-*` tokens via Tailwind classes. No further changes needed — the two files above cover the entire update.
+
+**Token format:** New hex values remain in hex (consistent with the existing `@theme` brand token block). No conversion to `oklch` required.
 
 ---
 
@@ -66,5 +69,17 @@ All other components (`contact.tsx`, inputs, buttons, borders, section dividers)
 
 ## Verification
 
-- `npm run build` exits clean
-- `npm run dev` → visual check: hero background reads as oceanic navy (not void-black), gold CTA reads solar (not amber-orange), teal accent visible in any `md-accent` usage, nav logo wrapper seamless
+1. **Grep for old hex values** — after applying changes, run:
+   ```bash
+   grep -r '#0A1628\|#142240\|#1D6FA4\|#4B9FFF\|#F5A623' src/
+   ```
+   Expected: zero results (only the `globals.css` token definitions will have been updated, so this confirms no stale hardcoded references remain).
+
+2. `npx tsc --noEmit` exits clean.
+
+3. `npm run build` exits clean.
+
+4. `npm run dev` → visual check:
+   - Hero background reads as oceanic navy (not void-black)
+   - Gold CTA button reads solar-yellow (not amber-orange)
+   - Nav background on scroll matches the page background seamlessly
