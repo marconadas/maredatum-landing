@@ -38,13 +38,16 @@ export function Hero() {
             : ""
         }`}
       >
-        <Image
-          src="/logos/logo-color-transparent.png"
-          alt="MareDatum"
-          width={130}
-          height={52}
-          priority
-        />
+        <div className="bg-[#0D1F2E]">
+          <Image
+            src="/logos/AF_Logos_MareDatum-03.png"
+            alt="MareDatum"
+            width={130}
+            height={52}
+            className="mix-blend-screen"
+            priority
+          />
+        </div>
 
         <ul className="hidden md:flex items-center gap-10">
           {NAV_LINKS.map(({ label, href }) => (
