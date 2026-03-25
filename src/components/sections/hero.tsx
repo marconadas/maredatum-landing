@@ -34,7 +34,7 @@ export function Hero() {
         {...fadeUp(0)}
         className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 md:px-14 py-4 transition-all duration-500 ${
           scrolled
-            ? "bg-[#0A1628]/90 backdrop-blur-md border-b border-white/8"
+            ? "bg-[#0D1F2E]/90 backdrop-blur-md border-b border-white/8"
             : ""
         }`}
       >
