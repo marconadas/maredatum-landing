@@ -76,7 +76,7 @@ function MareTextarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) 
 function FieldError({ errors, field }: { errors?: Record<string, string[] | undefined>; field: string }) {
   const msgs = errors?.[field]
   if (!msgs?.length) return null
-  return <p className="text-red-400 text-xs mt-1">{msgs[0]}</p>
+  return <p id={`${field}-error`} className="text-red-400 text-xs mt-1">{msgs[0]}</p>
 }
 
 // ── Contact section ───────────────────────────────────────────────────────────
@@ -167,14 +167,14 @@ export function Contact() {
                   <label htmlFor="nome" className="block text-xs tracking-widest uppercase text-white/50 mb-1.5">
                     Nome
                   </label>
-                  <MareInput id="nome" name="nome" type="text" autoComplete="name" />
+                  <MareInput id="nome" name="nome" type="text" autoComplete="name" aria-describedby={fieldErrors?.nome ? "nome-error" : undefined} />
                   <FieldError errors={fieldErrors} field="nome" />
                 </div>
                 <div>
                   <label htmlFor="empresa" className="block text-xs tracking-widest uppercase text-white/50 mb-1.5">
                     Empresa
                   </label>
-                  <MareInput id="empresa" name="empresa" type="text" autoComplete="organization" />
+                  <MareInput id="empresa" name="empresa" type="text" autoComplete="organization" aria-describedby={fieldErrors?.empresa ? "empresa-error" : undefined} />
                   <FieldError errors={fieldErrors} field="empresa" />
                 </div>
               </div>
@@ -184,7 +184,7 @@ export function Contact() {
                 <label htmlFor="email" className="block text-xs tracking-widest uppercase text-white/50 mb-1.5">
                   Email
                 </label>
-                <MareInput id="email" name="email" type="email" autoComplete="email" />
+                <MareInput id="email" name="email" type="email" autoComplete="email" aria-describedby={fieldErrors?.email ? "email-error" : undefined} />
                 <FieldError errors={fieldErrors} field="email" />
               </div>
 
@@ -193,7 +193,7 @@ export function Contact() {
                 <label htmlFor="assunto" className="block text-xs tracking-widest uppercase text-white/50 mb-1.5">
                   Assunto
                 </label>
-                <MareInput id="assunto" name="assunto" type="text" />
+                <MareInput id="assunto" name="assunto" type="text" aria-describedby={fieldErrors?.assunto ? "assunto-error" : undefined} />
                 <FieldError errors={fieldErrors} field="assunto" />
               </div>
 
@@ -202,7 +202,7 @@ export function Contact() {
                 <label htmlFor="mensagem" className="block text-xs tracking-widest uppercase text-white/50 mb-1.5">
                   Mensagem
                 </label>
-                <MareTextarea id="mensagem" name="mensagem" rows={5} />
+                <MareTextarea id="mensagem" name="mensagem" rows={5} aria-describedby={fieldErrors?.mensagem ? "mensagem-error" : undefined} />
                 <FieldError errors={fieldErrors} field="mensagem" />
               </div>
 
@@ -215,7 +215,7 @@ export function Contact() {
                 >
                   {isPending ? "A enviar..." : "Enviar mensagem"}
                   {/* Shimmer line on hover */}
-                  <span className="absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <span aria-hidden="true" className="absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </button>
               </div>
 
