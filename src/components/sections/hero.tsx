@@ -38,13 +38,13 @@ export function Hero() {
             : ""
         }`}
       >
-        <div className="bg-[#0D1F2E]">
+        <div className="bg-black mix-blend-screen">
           <Image
-            src="/logos/AF_Logos_MareDatum-03.png"
+            src="/logos/AF_Logos_MareDatum-04.png"
             alt="MareDatum"
             width={130}
             height={52}
-            className="mix-blend-screen"
+            style={{ filter: "invert(1)" }}
             priority
           />
         </div>
