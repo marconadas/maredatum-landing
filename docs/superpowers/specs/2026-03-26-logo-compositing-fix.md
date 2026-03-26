@@ -11,30 +11,48 @@ All MareDatum logo PNGs have opaque backgrounds (black or white). `mix-blend-scr
 
 ---
 
+## Current State
+
+`hero.tsx` currently has:
+- `{...fadeUp(0)}` on `motion.nav` (includes `opacity: 0 → 1` — this is the root cause)
+- Logo: `AF_Logos_MareDatum-04.png` inside a `bg-black mix-blend-screen` wrapper, with `style={{ filter: "invert(1)" }}` on the `<Image>` tag
+
+The `bg-black mix-blend-screen` wrapper already exists. The two things that need to change are: the nav animation and the logo source/filter.
+
+---
+
 ## Solution
 
-Remove `opacity` from the `motion.nav` entrance animation. Without an opacity animation, no isolated compositing context is created. `mix-blend-screen` on the logo wrapper then blends directly against the page content behind the nav (the `#0D1F2E` background + Three.js dots animation).
+Remove `opacity` from the `motion.nav` entrance animation. Without an opacity animation, no isolated compositing context is created. `mix-blend-screen` on the existing logo wrapper then blends directly against the page content behind the nav.
 
 ---
 
 ## Changes
 
-### `src/components/sections/hero.tsx`
+### `src/components/sections/hero.tsx` — two edits only
 
-**1. Nav animation** — replace `{...fadeUp(0)}` spread with explicit props that use only a `y` transform (no opacity):
+**1. Nav animation** — replace `{...fadeUp(0)}` with explicit props using only a `y` transform (no opacity). Keep the full `className` string exactly as-is:
 
 ```tsx
 <motion.nav
   initial={{ y: -8 }}
   animate={{ y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } }}
-  className={`fixed top-0 left-0 right-0 z-50 ...`}
+  className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 md:px-14 py-4 transition-all duration-500 ${
+    scrolled
+      ? "bg-[#0D1F2E]/90 backdrop-blur-md border-b border-white/8"
+      : ""
+  }`}
 >
 ```
 
-- `fadeUp` is NOT modified in `src/lib/motion.ts` — other elements that use `fadeUp` are unaffected
-- The nav entrance becomes a subtle 8px slide-down instead of fade+slide
+- `fadeUp` in `src/lib/motion.ts` is **not modified** — other elements using `fadeUp` are unaffected
+- Nav entrance becomes a subtle 8px slide-in from above (no fade — expected behaviour)
 
-**2. Logo element** — replace current logo markup with a `mix-blend-screen` wrapper around `-03.png`:
+**2. Logo** — inside the existing `bg-black mix-blend-screen` wrapper:
+- Change `src` from `AF_Logos_MareDatum-04.png` → `AF_Logos_MareDatum-03.png`
+- **Remove** `style={{ filter: "invert(1)" }}` — `-03.png` is already white/grey on black; inverting it would corrupt the tones
+
+Final logo markup:
 
 ```tsx
 <div className="bg-black mix-blend-screen">
@@ -47,10 +65,6 @@ Remove `opacity` from the `motion.nav` entrance animation. Without an opacity an
   />
 </div>
 ```
-
-- `AF_Logos_MareDatum-03.png` is the 3D monochrome logo (grey/white wave on black background)
-- `bg-black` matches the logo's own black background exactly
-- `mix-blend-screen` on the wrapper: black areas → transparent (blends to page bg), grey/white areas → logo mark shows
 
 ---
 
@@ -68,7 +82,8 @@ Remove `opacity` from the `motion.nav` entrance animation. Without an opacity an
 
 1. `npx tsc --noEmit` — no errors
 2. `npm run build` — clean
-3. `npm run dev` → scroll to top:
-   - Logo renders as white/grey wave mark with no visible rectangle behind it
-   - On scroll (nav gets `bg-[#0D1F2E]/90`): logo still renders cleanly
+3. `npm run dev` → visual check:
+   - **At top (nav transparent):** logo renders as white/grey 3D wave mark with no visible black rectangle
+   - **On scroll (nav gets `bg-[#0D1F2E]/90`):** logo still renders cleanly — the semi-transparent nav bg is dark enough that any blend difference is imperceptible
    - Nav entrance: slides in from slightly above (no fade — expected)
+   - All other animated elements (headline, subtitle, CTA, scroll indicator) still fade+slide as before
