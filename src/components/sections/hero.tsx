@@ -31,7 +31,8 @@ export function Hero() {
     <section className="relative min-h-screen flex flex-col">
       {/* Navigation */}
       <motion.nav
-        {...fadeUp(0)}
+        initial={{ y: -8 }}
+        animate={{ y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } }}
         className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 md:px-14 py-4 transition-all duration-500 ${
           scrolled
             ? "bg-[#0D1F2E]/90 backdrop-blur-md border-b border-white/8"
@@ -40,11 +41,10 @@ export function Hero() {
       >
         <div className="bg-black mix-blend-screen">
           <Image
-            src="/logos/AF_Logos_MareDatum-04.png"
+            src="/logos/AF_Logos_MareDatum-03.png"
             alt="MareDatum"
             width={130}
             height={52}
-            style={{ filter: "invert(1)" }}
             priority
           />
         </div>
