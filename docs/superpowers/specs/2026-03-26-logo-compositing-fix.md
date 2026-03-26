@@ -87,3 +87,4 @@ Final logo markup:
    - **On scroll (nav gets `bg-[#0D1F2E]/90`):** logo still renders cleanly — the semi-transparent nav bg is dark enough that any blend difference is imperceptible
    - Nav entrance: slides in from slightly above (no fade — expected)
    - All other animated elements (headline, subtitle, CTA, scroll indicator) still fade+slide as before
+   - **Mobile (375px):** logo still renders without visible black rectangle on small screens
