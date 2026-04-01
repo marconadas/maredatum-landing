@@ -1,3 +1,5 @@
+> **TODO (Marco):** Before sending this document to Zé Luís Lucena, add the real CNAME value from the Resend dashboard: Domains → Add maredatum.pt → copy the CNAME record value and replace the placeholder on line 11.
+
 # DNS Records for maredatum.pt — Resend Verification
 
 **Para:** Zé Luís Lucena

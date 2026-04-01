@@ -21,27 +21,16 @@ const contactSchema = z.object({
   mensagem: z.string().min(10, "Mensagem deve ter pelo menos 10 caracteres"),
 })
 
+if (!process.env.RESEND_API_KEY) {
+  throw new Error("RESEND_API_KEY environment variable is not set")
+}
+
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function contactAction(
   _prevState: ContactActionState,
   formData: FormData,
 ): Promise<ContactActionState> {
-  // ── Rate limiting ─────────────────────────────────────────────────────────
-  const headersList = await headers()
-  const ip =
-    headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    headersList.get("x-real-ip") ??
-    "unknown" // shared bucket for local dev / header-stripped requests — acceptable
-
-  const { success } = await ratelimit.limit(ip)
-  if (!success) {
-    return {
-      status: "serverError",
-      message: "Demasiadas tentativas. Por favor aguarde antes de tentar novamente.",
-    }
-  }
-
   // ── Validation ────────────────────────────────────────────────────────────
   const raw = {
     nome: formData.get("nome"),
@@ -61,6 +50,21 @@ export async function contactAction(
   }
 
   const { nome, email, empresa, assunto, mensagem } = result.data
+
+  // ── Rate limiting ─────────────────────────────────────────────────────────
+  const headersList = await headers()
+  const ip =
+    headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    headersList.get("x-real-ip") ??
+    "unknown" // shared bucket for local dev / header-stripped requests — acceptable
+
+  const { success } = await ratelimit.limit(ip)
+  if (!success) {
+    return {
+      status: "serverError",
+      message: "Demasiadas tentativas. Por favor aguarde antes de tentar novamente.",
+    }
+  }
 
   // ── Send email ────────────────────────────────────────────────────────────
   try {
