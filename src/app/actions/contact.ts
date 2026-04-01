@@ -1,10 +1,11 @@
 "use server"
 
+import { headers } from "next/headers"
 import { z } from "zod"
 import { Resend } from "resend"
+import { ratelimit } from "@/lib/ratelimit"
 
-// TODO: Add IP-based rate limiting (e.g., next-rate-limit) to prevent
-// Resend quota exhaustion from automated form submissions.
+// TODO: Add honeypot or CAPTCHA if spam becomes an issue.
 
 export type ContactActionState =
   | { status: "idle" }
@@ -26,6 +27,22 @@ export async function contactAction(
   _prevState: ContactActionState,
   formData: FormData,
 ): Promise<ContactActionState> {
+  // ── Rate limiting ─────────────────────────────────────────────────────────
+  const headersList = await headers()
+  const ip =
+    headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    headersList.get("x-real-ip") ??
+    "unknown"
+
+  const { success } = await ratelimit.limit(ip)
+  if (!success) {
+    return {
+      status: "serverError",
+      message: "Demasiadas tentativas. Por favor aguarde antes de tentar novamente.",
+    }
+  }
+
+  // ── Validation ────────────────────────────────────────────────────────────
   const raw = {
     nome: formData.get("nome"),
     email: formData.get("email"),
@@ -45,10 +62,12 @@ export async function contactAction(
 
   const { nome, email, empresa, assunto, mensagem } = result.data
 
+  // ── Send email ────────────────────────────────────────────────────────────
   try {
     await resend.emails.send({
       from: "onboarding@resend.dev", // Change to noreply@maredatum.pt after DNS verification
       to: "geral@maredatum.pt",
+      replyTo: email,
       subject: `[MareDatum] Novo contacto: ${assunto}`,
       text: `Nome: ${nome}\nEmail: ${email}\nEmpresa: ${empresa}\nAssunto: ${assunto}\n\n${mensagem}`,
     })
