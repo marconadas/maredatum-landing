@@ -32,7 +32,7 @@ export async function contactAction(
   const ip =
     headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     headersList.get("x-real-ip") ??
-    "unknown"
+    "unknown" // shared bucket for local dev / header-stripped requests — acceptable
 
   const { success } = await ratelimit.limit(ip)
   if (!success) {
