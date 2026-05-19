@@ -107,7 +107,7 @@ export function Contact() {
 
           <motion.p
             {...fadeUpScroll(0.2)}
-            className="text-sm text-white/55 leading-relaxed mb-10"
+            className="text-sm text-white/80 leading-relaxed mb-10"
           >
             Para projectos de Economia Azul, parcerias institucionais
             ou saber mais sobre Neptune e NavDatum.
@@ -122,13 +122,13 @@ export function Contact() {
 
             <a
               href="mailto:geral@maredatum.pt"
-              className="flex items-center gap-3 text-sm text-white/60 hover:text-white transition-colors duration-200"
+              className="flex items-center gap-3 text-sm text-white/85 hover:text-white transition-colors duration-200"
             >
               <Mail size={15} className="text-md-gold shrink-0" />
               geral@maredatum.pt
             </a>
 
-            <div className="flex items-center gap-3 text-sm text-white/60">
+            <div className="flex items-center gap-3 text-sm text-white/85">
               <MapPin size={15} className="text-md-gold shrink-0" />
               Lisboa · Luanda
             </div>

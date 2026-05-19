@@ -53,7 +53,7 @@ export function Hero() {
             <li key={href}>
               <a
                 href={href}
-                className="text-xs tracking-widest uppercase text-white/60 hover:text-white transition-colors duration-200"
+                className="text-xs tracking-widest uppercase text-white/85 hover:text-md-gold transition-colors duration-200"
               >
                 {label}
               </a>
@@ -100,7 +100,7 @@ export function Hero() {
           {/* Subtitle */}
           <motion.p
             {...fadeUp(0.5)}
-            className="text-sm md:text-base text-white/55 max-w-md mx-auto leading-relaxed tracking-wide"
+            className="text-sm md:text-base text-white/85 max-w-md mx-auto leading-relaxed tracking-wide"
           >
             Tecnologia e dados ao serviço das operações marítimas,
             aquacultura e vigilância costeira.
