@@ -100,7 +100,7 @@ export function Hero() {
           {/* Subtitle */}
           <motion.p
             {...fadeUp(0.5)}
-            className="text-sm md:text-base text-white/85 max-w-md mx-auto leading-relaxed tracking-wide"
+            className="text-sm md:text-base font-medium text-white max-w-md mx-auto leading-relaxed tracking-wide drop-shadow-[0_1px_8px_rgba(13,31,46,0.8)]"
           >
             Tecnologia e dados ao serviço das operações marítimas,
             aquacultura e vigilância costeira.
