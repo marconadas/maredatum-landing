@@ -21,11 +21,14 @@ const contactSchema = z.object({
   mensagem: z.string().min(10, "Mensagem deve ter pelo menos 10 caracteres"),
 })
 
-if (!process.env.RESEND_API_KEY) {
-  throw new Error("RESEND_API_KEY environment variable is not set")
+// Lazily instantiate so the page can render in dev without secrets.
+function getResend(): Resend {
+  const key = process.env.RESEND_API_KEY
+  if (!key) {
+    throw new Error("RESEND_API_KEY environment variable is not set")
+  }
+  return new Resend(key)
 }
-
-const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function contactAction(
   _prevState: ContactActionState,
@@ -68,9 +71,15 @@ export async function contactAction(
 
   // ── Send email ────────────────────────────────────────────────────────────
   try {
-    await resend.emails.send({
-      from: "onboarding@resend.dev", // Change to noreply@maredatum.pt after DNS verification
-      to: "geral@maredatum.pt",
+    // Defaults: sandbox FROM works without domain verification; real TO is geral@maredatum.pt.
+    // Override via env once maredatum.pt is verified in Resend.
+    const from =
+      process.env.CONTACT_FROM_EMAIL ?? "MareDatum <onboarding@resend.dev>"
+    const to = process.env.CONTACT_TO_EMAIL ?? "geral@maredatum.pt"
+
+    await getResend().emails.send({
+      from,
+      to,
       replyTo: email,
       subject: `[MareDatum] Novo contacto: ${assunto}`,
       text: `Nome: ${nome}\nEmail: ${email}\nEmpresa: ${empresa}\nAssunto: ${assunto}\n\n${mensagem}`,

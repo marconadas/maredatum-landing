@@ -1,7 +1,11 @@
-import type { NextConfig } from "next";
+import path from "node:path"
+import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  // Avoid picking up the parent worktree's package-lock.json as workspace root.
+  turbopack: {
+    root: path.join(__dirname),
+  },
+}
 
-export default nextConfig;
+export default nextConfig

@@ -39,15 +39,14 @@ export function Hero() {
             : ""
         }`}
       >
-        <div className="bg-black mix-blend-screen">
-          <Image
-            src="/logos/AF_Logos_MareDatum-03.png"
-            alt="MareDatum"
-            width={130}
-            height={52}
-            priority
-          />
-        </div>
+        <Image
+          src="/logos/MareDatum-logo.png"
+          alt="MareDatum"
+          width={130}
+          height={92}
+          priority
+          style={{ height: "auto" }}
+        />
 
         <ul className="hidden md:flex items-center gap-10">
           {NAV_LINKS.map(({ label, href }) => (

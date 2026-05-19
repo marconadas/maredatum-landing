@@ -110,7 +110,7 @@ export function Contact() {
             className="text-sm text-white/55 leading-relaxed mb-10"
           >
             Para projectos de Economia Azul, parcerias institucionais
-            ou saber mais sobre Neptune e CEFOPECAS.
+            ou saber mais sobre Neptune e NavDatum.
           </motion.p>
 
           <motion.div
