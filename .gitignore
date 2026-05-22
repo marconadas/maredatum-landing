@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Playwright MCP runtime artefacts
+.playwright-mcp/
+cpanel-*.png

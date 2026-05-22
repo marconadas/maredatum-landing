@@ -1,12 +1,23 @@
 "use client"
 
-import { useActionState, useState } from "react"
+import { useState } from "react"
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion"
 import { Mail, MapPin, CheckCircle } from "lucide-react"
-import { contactAction, type ContactActionState } from "@/app/actions/contact"
 import { fadeUpScroll } from "@/lib/motion"
 
-const initialState = { status: "idle" } satisfies ContactActionState
+// API endpoint. When deployed as a static site on cPanel the form posts
+// cross-origin to the Vercel-hosted Next.js API. Default falls back to a
+// same-origin /api/contact for local dev and the Vercel deployment itself.
+const CONTACT_API_URL =
+  process.env.NEXT_PUBLIC_CONTACT_API_URL ?? "/api/contact"
+
+type ContactState =
+  | { status: "idle" }
+  | { status: "error"; errors: Record<string, string[] | undefined> }
+  | { status: "serverError"; message: string }
+  | { status: "success" }
+
+const initialState: ContactState = { status: "idle" }
 
 // ── Animated input: gold radial gradient follows cursor on hover ──────────────
 function MareInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
@@ -81,8 +92,38 @@ function FieldError({ errors, field }: { errors?: Record<string, string[] | unde
 
 // ── Contact section ───────────────────────────────────────────────────────────
 export function Contact() {
-  const [state, dispatch, isPending] = useActionState(contactAction, initialState)
+  const [state, setState] = useState<ContactState>(initialState)
+  const [isPending, setIsPending] = useState(false)
   const fieldErrors = state.status === "error" ? state.errors : undefined
+
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
+    const payload = Object.fromEntries(formData.entries())
+    setIsPending(true)
+    try {
+      const res = await fetch(CONTACT_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+      const data = (await res.json().catch(() => null)) as ContactState | null
+      setState(
+        data ?? {
+          status: "serverError",
+          message:
+            "Não foi possível enviar a mensagem. Por favor tente novamente.",
+        },
+      )
+    } catch {
+      setState({
+        status: "serverError",
+        message: "Falha de rede. Verifique a ligação e tente novamente.",
+      })
+    } finally {
+      setIsPending(false)
+    }
+  }
 
   return (
     <section id="contacto" className="bg-md-bg border-t border-white/8 py-24 px-8 md:px-14">
@@ -155,7 +196,7 @@ export function Contact() {
               </p>
             </div>
           ) : (
-            <form action={dispatch} className="flex flex-col gap-5">
+            <form onSubmit={onSubmit} className="flex flex-col gap-5">
 
               {state.status === "serverError" && (
                 <p role="alert" className="text-red-400 text-sm mb-2">{state.message}</p>
