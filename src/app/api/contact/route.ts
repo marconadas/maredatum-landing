@@ -85,8 +85,15 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const { success } = await ratelimit.limit(clientIp(req))
-  if (!success) {
+  // Fail-open: if Upstash flakes or creds rotate, don't block the form.
+  let allowed = true
+  try {
+    const { success } = await ratelimit.limit(clientIp(req))
+    allowed = success
+  } catch (err) {
+    console.error("[/api/contact] ratelimit failure (fail-open):", err)
+  }
+  if (!allowed) {
     return NextResponse.json(
       {
         status: "serverError",
