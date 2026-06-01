@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
       process.env.CONTACT_FROM_EMAIL ?? "MareDatum <onboarding@resend.dev>"
     const to = process.env.CONTACT_TO_EMAIL ?? "geral@maredatum.pt"
 
-    await getResend().emails.send({
+    const { data, error } = await getResend().emails.send({
       from,
       to,
       replyTo: email,
@@ -119,6 +119,21 @@ export async function POST(req: NextRequest) {
       text: `Nome: ${nome}\nEmail: ${email}\nEmpresa: ${empresa}\nAssunto: ${assunto}\n\n${mensagem}`,
     })
 
+    // The Resend SDK does NOT throw on validation/quota/sandbox errors —
+    // it returns { data: null, error: { ... } }. Treat that as a failure.
+    if (error) {
+      console.error("[/api/contact] Resend rejected the send:", error)
+      return NextResponse.json(
+        {
+          status: "serverError",
+          message:
+            "Não foi possível enviar a mensagem. Por favor tente novamente.",
+        },
+        { status: 502, headers: cors },
+      )
+    }
+
+    console.log("[/api/contact] Resend accepted email id:", data?.id)
     return NextResponse.json(
       { status: "success" },
       { status: 200, headers: cors },
