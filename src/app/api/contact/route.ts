@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
-import { Resend } from "resend"
+import nodemailer from "nodemailer"
 import { ratelimit } from "@/lib/ratelimit"
 
-// Force Node runtime (Resend SDK uses Node-only APIs).
+// Force Node runtime (nodemailer uses Node-only APIs).
 export const runtime = "nodejs"
 
 const contactSchema = z.object({
@@ -42,11 +42,23 @@ export function OPTIONS(req: NextRequest) {
   })
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function getResend(): Resend {
-  const key = process.env.RESEND_API_KEY
-  if (!key) throw new Error("RESEND_API_KEY environment variable is not set")
-  return new Resend(key)
+// ── SMTP (Microsoft 365 / Outlook) ──────────────────────────────────────────────
+// Authenticates as the geral@maredatum.pt mailbox and sends directly — no domain
+// verification or third-party sandbox involved.
+function getTransport() {
+  const host = process.env.SMTP_HOST ?? "smtp.office365.com"
+  const port = Number(process.env.SMTP_PORT ?? 587)
+  const user = process.env.SMTP_USER
+  const pass = process.env.SMTP_PASS
+  if (!user || !pass) {
+    throw new Error("SMTP_USER / SMTP_PASS environment variables are not set")
+  }
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465, // 587 uses STARTTLS (secure:false), 465 uses TLS
+    auth: { user, pass },
+  })
 }
 
 function clientIp(req: NextRequest): string {
@@ -107,39 +119,26 @@ export async function POST(req: NextRequest) {
   const { nome, email, empresa, assunto, mensagem } = parsed.data
 
   try {
-    const from =
-      process.env.CONTACT_FROM_EMAIL ?? "MareDatum <onboarding@resend.dev>"
-    const to = process.env.CONTACT_TO_EMAIL ?? "geral@maredatum.pt"
+    // Must send "from" the authenticated mailbox; the visitor goes in replyTo.
+    const mailbox = process.env.SMTP_USER ?? "geral@maredatum.pt"
+    const from = process.env.CONTACT_FROM_EMAIL ?? `MareDatum <${mailbox}>`
+    const to = process.env.CONTACT_TO_EMAIL ?? mailbox
 
-    const { data, error } = await getResend().emails.send({
+    const info = await getTransport().sendMail({
       from,
       to,
-      replyTo: email,
+      replyTo: `${nome} <${email}>`,
       subject: `[MareDatum] Novo contacto: ${assunto}`,
       text: `Nome: ${nome}\nEmail: ${email}\nEmpresa: ${empresa}\nAssunto: ${assunto}\n\n${mensagem}`,
     })
 
-    // The Resend SDK does NOT throw on validation/quota/sandbox errors —
-    // it returns { data: null, error: { ... } }. Treat that as a failure.
-    if (error) {
-      console.error("[/api/contact] Resend rejected the send:", error)
-      return NextResponse.json(
-        {
-          status: "serverError",
-          message:
-            "Não foi possível enviar a mensagem. Por favor tente novamente.",
-        },
-        { status: 502, headers: cors },
-      )
-    }
-
-    console.log("[/api/contact] Resend accepted email id:", data?.id)
+    console.log("[/api/contact] sent messageId:", info.messageId)
     return NextResponse.json(
       { status: "success" },
       { status: 200, headers: cors },
     )
   } catch (err) {
-    console.error("[/api/contact] Resend error:", err)
+    console.error("[/api/contact] SMTP error:", err)
     return NextResponse.json(
       {
         status: "serverError",
